@@ -12,7 +12,9 @@ RUN apk update && apk add --no-cache \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
-    libzip-dev
+    libzip-dev \
+    netcat-openbsd \
+    bash
 
 # Instalar extensões do PHP necessárias
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
@@ -39,13 +41,30 @@ RUN addgroup -g 1000 laravel && adduser -G laravel -g laravel -s /bin/sh -D lara
 WORKDIR /var/www/html
 
 # Copiar arquivos do projeto
-COPY . .
+COPY --chown=laravel:laravel . .
+
+# Copiar script de entrada
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Tornar scripts executáveis
+RUN chmod +x /var/www/html/init-backend.sh || true
+
+# Criar diretórios necessários com permissões corretas
+RUN mkdir -p /var/www/html/storage/framework/cache \
+    /var/www/html/storage/framework/sessions \
+    /var/www/html/storage/framework/views \
+    /var/www/html/storage/logs \
+    /var/www/html/bootstrap/cache
 
 # Ajustar permissões
-RUN chown -R laravel:laravel /var/www/html
-USER laravel
+RUN chown -R laravel:laravel /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
 
 # Expor porta
 EXPOSE 9000
 
-CMD ["php-fpm"]
+USER laravel
+
+ENTRYPOINT ["docker-entrypoint.sh"]

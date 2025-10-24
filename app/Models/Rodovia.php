@@ -10,12 +10,12 @@ class Rodovia extends Model
     use HasFactory;
 
     protected $fillable = [
-        'rodovia',
+        'nome',
+        'estado_id',
         'trecho_inicial',
         'trecho_final',
         'extensao_km',
         'situacao',
-        'municipios', // manter caso ainda use JSON antes da pivô
     ];
 
     /**

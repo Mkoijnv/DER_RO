@@ -1,0 +1,15 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 40px 20px;
+}
+
+.main-content.no-auth {
+  padding: 0;
+}
+

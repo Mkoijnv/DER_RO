@@ -1,0 +1,119 @@
+.header {
+  background-color: var(--blue-warm-vivid-70);
+  color: white;
+  padding: 0;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.gov-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gov-logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+.gov-text {
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-link:hover {
+  background-color: var(--blue-warm-vivid-80);
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: 24px;
+  border-left: 2px solid var(--blue-warm-20);
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.btn-logout {
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background-color: white;
+  color: var(--blue-warm-vivid-70);
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-nav {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .user-menu {
+    padding-left: 0;
+    border-left: none;
+    padding-top: 12px;
+    border-top: 2px solid var(--blue-warm-20);
+    width: 100%;
+  }
+}
+

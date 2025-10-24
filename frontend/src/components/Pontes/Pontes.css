@@ -1,0 +1,232 @@
+/* Badges de situação */
+.badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.badge-boa {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-regular {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-ruim {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.badge-interditada {
+  background-color: #721c24;
+  color: white;
+}
+
+.coordinates {
+  font-size: 12px;
+  color: var(--gray-60);
+  font-family: monospace;
+}
+
+.text-muted {
+  color: var(--gray-60);
+  font-style: italic;
+}
+
+.form-text {
+  display: block;
+  margin-top: 4px;
+  color: var(--gray-60);
+  font-size: 13px;
+}
+
+.link-rodovia {
+  color: var(--blue-warm-vivid-70);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link-rodovia:hover {
+  text-decoration: underline;
+}
+
+.map-preview {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: var(--blue-warm-10);
+  border-radius: 8px;
+  border-left: 4px solid var(--blue-warm-vivid-70);
+}
+
+.map-info {
+  margin: 0;
+  color: var(--gray-80);
+  font-size: 16px;
+}
+
+.map-info a {
+  color: var(--blue-warm-vivid-70);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.map-info a:hover {
+  text-decoration: underline;
+}
+
+.ponte-foto {
+  text-align: center;
+  padding: 20px;
+}
+
+.ponte-foto img {
+  max-width: 100%;
+  max-height: 500px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+/* Estilos do popup do mapa */
+.map-popup h3 {
+  margin: 0 0 12px 0;
+  color: var(--blue-warm-vivid-70);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.popup-info {
+  margin: 0;
+}
+
+.popup-info p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: var(--gray-80);
+}
+
+.popup-info p strong {
+  color: var(--gray-60);
+  font-weight: 600;
+}
+
+/* Container do mapa */
+.map-container {
+  position: relative;
+  z-index: 1;
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
+
+/* Layout em grade 2x2 para os botões */
+.action-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.action-buttons-grid .btn-sm {
+  padding: 6px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+/* Botão de fotos */
+.btn-info {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+  transform: translateY(-1px);
+}
+
+.btn-info:active {
+  transform: translateY(0);
+}
+
+/* Responsividade dos botões */
+@media (max-width: 768px) {
+  .table {
+    font-size: 13px;
+  }
+  
+  .table th,
+  .table td {
+    padding: 8px 4px;
+  }
+  
+  /* Ocultar colunas menos importantes em mobile */
+  .table th:nth-child(5), /* Material */
+  .table td:nth-child(5) {
+    display: none;
+  }
+  
+  .table th:nth-child(7), /* Coordenadas */
+  .table td:nth-child(7) {
+    display: none;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+  
+  .action-buttons .btn-sm {
+    width: 100%;
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  
+  /* Grid mantém 2 colunas em tablet */
+  .action-buttons-grid {
+    max-width: 100%;
+    gap: 4px;
+  }
+  
+  .action-buttons-grid .btn-sm {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table {
+    font-size: 12px;
+  }
+  
+  /* Ocultar mais colunas em telas muito pequenas */
+  .table th:nth-child(4), /* KM */
+  .table td:nth-child(4) {
+    display: none;
+  }
+  
+  .action-buttons .btn-sm {
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+  
+  /* Grid continua 2 colunas mas com texto menor */
+  .action-buttons-grid .btn-sm {
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+}
+
