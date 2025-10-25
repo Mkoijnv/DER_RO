@@ -2,14 +2,25 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 .main-content {
   flex: 1;
   padding: 40px 20px;
+  margin: 0;
+}
+
+/* Remove padding das páginas de autenticação */
+.main-content:has(.auth-container) {
+  padding: 0;
+  margin: 0;
 }
 
 .main-content.no-auth {
   padding: 0;
+  margin: 0;
 }
 

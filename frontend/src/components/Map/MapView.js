@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Eye, X } from 'lucide-react';
 import ponteService from '../../services/ponteService';
 import './MapView.css';
 import 'leaflet/dist/leaflet.css';
@@ -246,29 +247,50 @@ const MapView = () => {
         {/* Lista de Pontes Lateral */}
         <div className="pontes-sidebar">
           <div className="sidebar-header">
-            <h3>Pontes Encontradas</h3>
-            {pontesFiltradas.length > 0 && (
-              <div className="navigation-controls">
+            <h3>🌉 Pontes Encontradas</h3>
+            <span className="total-counter">{pontesFiltradas.length} {pontesFiltradas.length === 1 ? 'ponte' : 'pontes'}</span>
+          </div>
+
+          {pontesFiltradas.length > 0 && (
+            <div className="navigation-panel">
+              <div className="nav-info">
+                <span className="nav-label">Navegação:</span>
+                <span className="nav-current">
+                  Ponte {indiceAtual >= 0 ? indiceAtual + 1 : '-'} de {pontesFiltradas.length}
+                </span>
+              </div>
+              <div className="nav-buttons">
                 <button
                   onClick={handlePonteAnterior}
-                  className="nav-btn nav-btn-prev"
-                  title="Ponte Anterior"
+                  className={`nav-btn nav-btn-prev ${indiceAtual <= 0 ? 'nav-btn-disabled' : ''}`}
+                  disabled={indiceAtual <= 0}
+                  title="Ir para ponte anterior"
                 >
-                  ⬅️
+                  <span className="nav-icon">
+                    <ChevronLeft size={20} strokeWidth={2.5} />
+                  </span>
+                  <span className="nav-text">Anterior</span>
                 </button>
-                <span className="nav-counter">
-                  {indiceAtual >= 0 ? indiceAtual + 1 : '-'} / {pontesFiltradas.length}
-                </span>
                 <button
                   onClick={handleProximaPonte}
-                  className="nav-btn nav-btn-next"
-                  title="Próxima Ponte"
+                  className={`nav-btn nav-btn-next ${indiceAtual >= pontesFiltradas.length - 1 ? 'nav-btn-disabled' : ''}`}
+                  disabled={indiceAtual >= pontesFiltradas.length - 1}
+                  title="Ir para próxima ponte"
                 >
-                  ➡️
+                  <span className="nav-text">Próxima</span>
+                  <span className="nav-icon">
+                    <ChevronRight size={20} strokeWidth={2.5} />
+                  </span>
                 </button>
               </div>
-            )}
-          </div>
+              <div className="nav-progress">
+                <div 
+                  className="nav-progress-bar" 
+                  style={{ width: `${((indiceAtual + 1) / pontesFiltradas.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
 
           <div className="pontes-list">
             {pontesFiltradas.length === 0 ? (
@@ -301,7 +323,7 @@ const MapView = () => {
                         className="btn btn-sm btn-primary"
                         style={{ width: '100%' }}
                       >
-                        Ver Detalhes
+                        <Eye size={16} /> Ver Detalhes
                       </Link>
                     </div>
                   )}
@@ -401,7 +423,7 @@ const MapView = () => {
                             </p>
                           </div>
                           <Link to={`/pontes/${ponte.id}`} className="btn btn-sm btn-primary" style={{ width: '100%' }}>
-                            Ver Detalhes Completos
+                            <Eye size={16} /> Ver Detalhes Completos
                           </Link>
                         </div>
                       </Popup>

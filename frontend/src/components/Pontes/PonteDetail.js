@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Pencil, Trash2, ArrowLeft } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import ponteService from '../../services/ponteService';
+import ConfirmDeleteModal from '../Modal/ConfirmDeleteModal';
 import 'leaflet/dist/leaflet.css';
 import './Pontes.css';
 import L from 'leaflet';
@@ -37,6 +39,7 @@ const PonteDetail = () => {
   const [ponte, setPonte] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false });
 
   useEffect(() => {
     loadPonte();
@@ -53,15 +56,23 @@ const PonteDetail = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (window.confirm('Tem certeza que deseja excluir esta ponte?')) {
-      try {
-        await ponteService.delete(id);
-        navigate('/pontes');
-      } catch (err) {
-        setError('Erro ao excluir ponte');
-      }
+  const handleDeleteClick = () => {
+    setDeleteModal({ isOpen: true });
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await ponteService.delete(id);
+      setDeleteModal({ isOpen: false });
+      navigate('/pontes');
+    } catch (err) {
+      setError('Erro ao excluir ponte');
+      setDeleteModal({ isOpen: false });
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModal({ isOpen: false });
   };
 
   if (loading) {
@@ -80,15 +91,15 @@ const PonteDetail = () => {
     <div className="container">
       <div className="page-header">
         <h1 className="page-title">Detalhes da Ponte</h1>
-        <div className="action-buttons">
-          <Link to={`/pontes/${id}/editar`} className="btn btn-primary">
-            Editar
+        <div className="detail-actions">
+          <Link to={`/pontes/${id}/editar`} className="btn-detail btn-detail-primary">
+            <Pencil size={18} /> Editar
           </Link>
-          <button onClick={handleDelete} className="btn btn-danger">
-            Excluir
+          <button onClick={handleDeleteClick} className="btn-detail btn-detail-danger">
+            <Trash2 size={18} /> Excluir
           </button>
-          <Link to="/pontes" className="btn btn-secondary">
-            Voltar
+          <Link to="/pontes" className="btn-detail btn-detail-secondary">
+            <ArrowLeft size={18} /> Voltar
           </Link>
         </div>
       </div>
@@ -215,6 +226,14 @@ const PonteDetail = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName={ponte?.nome || ''}
+        itemType="ponte"
+      />
     </div>
   );
 };

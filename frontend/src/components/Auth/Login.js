@@ -28,7 +28,6 @@ const Login = () => {
   useEffect(() => {
     let interval;
     if (loading && progress < 90) {
-      // Simula progresso até 90% durante o loading
       interval = setInterval(() => {
         setProgress(prev => {
           const increment = Math.random() * 15;
@@ -46,18 +45,11 @@ const Login = () => {
     setProgress(0);
 
     try {
-      // Inicia em 10%
       setProgress(10);
-      
-      // Faz o login
       await authService.login(formData.email, formData.password);
-      
-      // Completa a barra (100%)
       setProgress(100);
-      
       toast.success('Login realizado com sucesso!');
       
-      // Aguarda um pouco para mostrar a barra completa
       setTimeout(() => {
         navigate('/dashboard');
       }, 500);
@@ -66,20 +58,42 @@ const Login = () => {
       setError(errorMsg);
       toast.error(errorMsg);
       setLoading(false);
-      setProgress(0); // Reseta a barra em caso de erro
+      setProgress(0);
     }
   };
 
   return (
     <div className="auth-container">
+      <div className="auth-background-pattern"></div>
+      
       <div className="auth-card">
-        <div className="auth-header">
-          <div className="gov-logo-large">
-            <div className="gov-flag-large"></div>
-            <span className="gov-text-large">GOVERNO</span>
+        {/* Logo do Governo */}
+        <div className="auth-brand">
+          <div className="brand-logos">
+            <img 
+              src="https://cdn.detic.ro.gov.br/imgs/svg/palacio.svg" 
+              alt="Palácio do Governo de Rondônia" 
+              className="palacio-logo"
+            />
+            <div className="brand-divider"></div>
+            <img 
+              src="/logo-rondonia.jpg" 
+              alt="Governo de Rondônia" 
+              className="governo-logo"
+            />
           </div>
-          <h2>Sistema de Gestão de Rodovias</h2>
-          <p>Entre com suas credenciais</p>
+          
+          <div className="brand-text">
+            <h1>Governo de Rondônia</h1>
+            <p>Departamento de Estradas de Rodagem e Transportes</p>
+          </div>
+        </div>
+
+        {/* Header do Login */}
+        <div className="auth-header">
+          <h2>Sistema de Gestão</h2>
+          <h3>Rodovias e Pontes</h3>
+          <p className="auth-subtitle">Acesse sua conta para continuar</p>
         </div>
 
         {successMessage && (
@@ -94,9 +108,12 @@ const Login = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label className="form-label">E-mail</label>
+            <label className="form-label">
+              <span className="label-icon">📧</span>
+              E-mail Institucional
+            </label>
             <input
               type="email"
               name="email"
@@ -104,12 +121,16 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="seu.email@gov.br"
+              placeholder="seu.email@deter.ro.gov.br"
+              autoComplete="email"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Senha</label>
+            <label className="form-label">
+              <span className="label-icon">🔒</span>
+              Senha
+            </label>
             <input
               type="password"
               name="password"
@@ -117,7 +138,8 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="••••••••"
+              placeholder="Digite sua senha"
+              autoComplete="current-password"
             />
           </div>
 
@@ -133,10 +155,12 @@ const Login = () => {
                   <span>Autenticando... {Math.round(progress)}%</span>
                 </>
               ) : (
-                'Entrar'
+                <>
+                  <span>Entrar no Sistema</span>
+                  <span className="btn-arrow">→</span>
+                </>
               )}
             </span>
-            {/* Barra de progresso dentro do botão */}
             {loading && (
               <div 
                 className="btn-progress-bar" 
@@ -147,17 +171,34 @@ const Login = () => {
         </form>
 
         <div className="auth-footer">
-          <p>
-            Não tem uma conta?{' '}
+          <p className="auth-footer-text">
+            Não possui acesso?{' '}
             <Link to="/register" className="auth-link">
-              Cadastre-se
+              Solicitar cadastro
             </Link>
           </p>
+          <div className="auth-divider">
+            <span>ou</span>
+          </div>
+          <p className="auth-help">
+            Precisa de ajuda? Entre em contato com o suporte técnico
+          </p>
         </div>
+      </div>
+
+      {/* Rodapé institucional */}
+      <div className="auth-institutional-footer">
+        <p>© 2025 Governo do Estado de Rondônia - Todos os direitos reservados</p>
+        <p className="footer-links">
+          <a href="#" onClick={(e) => e.preventDefault()}>Privacidade</a>
+          {' · '}
+          <a href="#" onClick={(e) => e.preventDefault()}>Termos de Uso</a>
+          {' · '}
+          <a href="#" onClick={(e) => e.preventDefault()}>Suporte</a>
+        </p>
       </div>
     </div>
   );
 };
 
 export default Login;
-

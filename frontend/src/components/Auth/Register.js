@@ -54,18 +54,15 @@ const Register = () => {
     setProgress(0);
 
     try {
-      // Inicia em 10%
       setProgress(10);
 
-      // Faz o registro
-      const response = await authService.register(
+      await authService.register(
         formData.name,
         formData.email,
         formData.password,
         formData.password_confirmation
       );
       
-      // Completa a barra (100%)
       setProgress(100);
       
       // Limpa o token e usuário (não fazer login automático)
@@ -74,7 +71,6 @@ const Register = () => {
       
       toast.success('Conta criada com sucesso! Faça login para continuar.');
       
-      // Aguarda um pouco para mostrar a barra completa e redireciona para login
       setTimeout(() => {
         navigate('/login', { 
           state: { 
@@ -94,14 +90,36 @@ const Register = () => {
 
   return (
     <div className="auth-container">
+      <div className="auth-background-pattern"></div>
+      
       <div className="auth-card">
-        <div className="auth-header">
-          <div className="gov-logo-large">
-            <div className="gov-flag-large"></div>
-            <span className="gov-text-large">GOVERNO</span>
+        {/* Logo do Governo */}
+        <div className="auth-brand">
+          <div className="brand-logos">
+            <img 
+              src="https://cdn.detic.ro.gov.br/imgs/svg/palacio.svg" 
+              alt="Palácio do Governo de Rondônia" 
+              className="palacio-logo"
+            />
+            <div className="brand-divider"></div>
+            <img 
+              src="/logo-rondonia.jpg" 
+              alt="Governo de Rondônia" 
+              className="governo-logo"
+            />
           </div>
+          
+          <div className="brand-text">
+            <h1>Governo de Rondônia</h1>
+            <p>Departamento de Estradas de Rodagem e Transportes</p>
+          </div>
+        </div>
+
+        {/* Header do Cadastro */}
+        <div className="auth-header">
           <h2>Criar Conta</h2>
-          <p>Preencha os dados para cadastro</p>
+          <h3>Sistema de Gestão</h3>
+          <p className="auth-subtitle">Preencha seus dados para solicitar acesso</p>
         </div>
 
         {error && (
@@ -110,9 +128,12 @@ const Register = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label className="form-label">Nome Completo</label>
+            <label className="form-label">
+              <span className="label-icon">👤</span>
+              Nome Completo
+            </label>
             <input
               type="text"
               name="name"
@@ -120,12 +141,16 @@ const Register = () => {
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="Seu nome completo"
+              placeholder="Digite seu nome completo"
+              autoComplete="name"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">E-mail</label>
+            <label className="form-label">
+              <span className="label-icon">📧</span>
+              E-mail Institucional
+            </label>
             <input
               type="email"
               name="email"
@@ -133,12 +158,16 @@ const Register = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="seu.email@gov.br"
+              placeholder="seu.email@deter.ro.gov.br"
+              autoComplete="email"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Senha</label>
+            <label className="form-label">
+              <span className="label-icon">🔒</span>
+              Senha
+            </label>
             <input
               type="password"
               name="password"
@@ -148,11 +177,16 @@ const Register = () => {
               required
               placeholder="Mínimo 8 caracteres"
               minLength="8"
+              autoComplete="new-password"
             />
+            <small className="form-hint">Use letras, números e caracteres especiais</small>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Confirmar Senha</label>
+            <label className="form-label">
+              <span className="label-icon">✓</span>
+              Confirmar Senha
+            </label>
             <input
               type="password"
               name="password_confirmation"
@@ -160,7 +194,8 @@ const Register = () => {
               value={formData.password_confirmation}
               onChange={handleChange}
               required
-              placeholder="Confirme sua senha"
+              placeholder="Digite a senha novamente"
+              autoComplete="new-password"
             />
           </div>
 
@@ -176,10 +211,12 @@ const Register = () => {
                   <span>Criando conta... {Math.round(progress)}%</span>
                 </>
               ) : (
-                'Cadastrar'
+                <>
+                  <span>Criar Conta</span>
+                  <span className="btn-arrow">→</span>
+                </>
               )}
             </span>
-            {/* Barra de progresso dentro do botão */}
             {loading && (
               <div 
                 className="btn-progress-bar" 
@@ -190,17 +227,34 @@ const Register = () => {
         </form>
 
         <div className="auth-footer">
-          <p>
-            Já tem uma conta?{' '}
+          <p className="auth-footer-text">
+            Já possui uma conta?{' '}
             <Link to="/login" className="auth-link">
-              Entre aqui
+              Fazer login
             </Link>
           </p>
+          <div className="auth-divider">
+            <span>ou</span>
+          </div>
+          <p className="auth-help">
+            Após o cadastro, aguarde a aprovação do administrador
+          </p>
         </div>
+      </div>
+
+      {/* Rodapé institucional */}
+      <div className="auth-institutional-footer">
+        <p>© 2025 Governo do Estado de Rondônia - Todos os direitos reservados</p>
+        <p className="footer-links">
+          <a href="#" onClick={(e) => e.preventDefault()}>Privacidade</a>
+          {' · '}
+          <a href="#" onClick={(e) => e.preventDefault()}>Termos de Uso</a>
+          {' · '}
+          <a href="#" onClick={(e) => e.preventDefault()}>Suporte</a>
+        </p>
       </div>
     </div>
   );
 };
 
 export default Register;
-

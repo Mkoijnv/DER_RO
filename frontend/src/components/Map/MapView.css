@@ -78,57 +78,150 @@
 .sidebar-header {
   padding: 20px;
   border-bottom: 2px solid var(--gray-20);
-  background: linear-gradient(135deg, var(--blue-warm-vivid-70), var(--blue-warm-vivid-60));
+  background: linear-gradient(135deg, #003d82, #0056b3);
   color: white;
   border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .sidebar-header h3 {
-  margin: 0 0 12px 0;
+  margin: 0;
   font-size: 18px;
   font-weight: 700;
 }
 
-.navigation-controls {
+.total-counter {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+/* Painel de Navegação */
+.navigation-panel {
+  background: linear-gradient(135deg, #f8fafc, #e6ecf5);
+  padding: 16px;
+  border-bottom: 2px solid var(--gray-20);
+}
+
+.nav-info {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 8px 12px;
-  border-radius: 6px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.nav-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-60);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-current {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blue-warm-vivid-70);
+  background: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.nav-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .nav-btn {
-  background: white;
+  background: linear-gradient(135deg, #003d82, #0056b3);
+  color: white;
   border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
+  padding: 12px 16px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 61, 130, 0.3);
 }
 
-.nav-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.nav-btn:hover:not(.nav-btn-disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 61, 130, 0.4);
+  background: linear-gradient(135deg, #002850, #003d82);
 }
 
-.nav-btn:active {
-  transform: scale(0.95);
+.nav-btn:active:not(.nav-btn-disabled) {
+  transform: translateY(0);
 }
 
-.nav-counter {
+.nav-btn-disabled {
+  background: var(--gray-20);
+  color: var(--gray-60);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.nav-icon {
   font-size: 14px;
-  font-weight: 700;
-  color: white;
-  min-width: 60px;
-  text-align: center;
+  font-weight: bold;
+}
+
+.nav-text {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Barra de Progresso */
+.nav-progress {
+  height: 6px;
+  background: rgba(0, 61, 130, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.nav-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #003d82, #0056b3, #17a2b8);
+  border-radius: 10px;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 10px rgba(0, 61, 130, 0.5);
+  position: relative;
+}
+
+.nav-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4));
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Lista de Pontes */
@@ -423,6 +516,19 @@
     grid-template-columns: 300px 1fr;
   }
   
+  .nav-buttons {
+    gap: 8px;
+  }
+  
+  .nav-btn {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .nav-text {
+    font-size: 12px;
+  }
+  
   .pontes-sidebar {
     max-height: 600px;
   }
@@ -441,6 +547,30 @@
   .pontes-sidebar {
     max-height: 400px;
     order: 2;
+  }
+  
+  .sidebar-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .total-counter {
+    align-self: flex-start;
+  }
+  
+  .navigation-panel {
+    padding: 12px;
+  }
+  
+  .nav-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .nav-current {
+    align-self: flex-end;
   }
   
   .map-wrapper {
@@ -478,6 +608,41 @@
   
   .map-container {
     height: 400px;
+  }
+  
+  .sidebar-header h3 {
+    font-size: 16px;
+  }
+  
+  .total-counter {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  
+  .navigation-panel {
+    padding: 12px;
+  }
+  
+  .nav-buttons {
+    gap: 8px;
+  }
+  
+  .nav-btn {
+    padding: 10px 12px;
+    font-size: 12px;
+    gap: 6px;
+  }
+  
+  .nav-icon {
+    font-size: 12px;
+  }
+  
+  .nav-text {
+    font-size: 11px;
+  }
+  
+  .nav-progress {
+    height: 5px;
   }
   
   .pontes-sidebar {

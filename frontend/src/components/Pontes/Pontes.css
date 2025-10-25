@@ -125,24 +125,220 @@
   font-family: inherit;
 }
 
-/* Layout em grade 2x2 para os botões */
+/* Estilos da tabela e botões de ação */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.table {
+  min-width: 1100px;
+  table-layout: auto;
+}
+
+/* Ajustar largura das colunas */
+.table thead th:nth-child(1), /* Foto */
+.table tbody td:nth-child(1) {
+  width: 80px;
+  min-width: 80px;
+}
+
+.table thead th:nth-child(2), /* Nome */
+.table tbody td:nth-child(2) {
+  min-width: 150px;
+  max-width: 250px;
+}
+
+.table thead th:nth-child(3), /* Rodovia */
+.table tbody td:nth-child(3) {
+  width: 100px;
+}
+
+.table thead th:nth-child(4), /* Rio */
+.table tbody td:nth-child(4) {
+  width: 120px;
+}
+
+.table thead th:nth-child(5), /* KM */
+.table tbody td:nth-child(5) {
+  width: 80px;
+}
+
+.table thead th:nth-child(6), /* Material */
+.table tbody td:nth-child(6) {
+  width: 100px;
+}
+
+.table thead th:nth-child(7), /* Situação */
+.table tbody td:nth-child(7) {
+  width: 100px;
+}
+
+.table thead th:nth-child(8), /* Coordenadas */
+.table tbody td:nth-child(8) {
+  width: 150px;
+}
+
+/* Garantir largura mínima para a coluna de ações */
+.table thead th:last-child,
+.table tbody td:last-child {
+  min-width: 160px;
+  max-width: 160px;
+  width: 160px;
+  text-align: center;
+  padding-right: 8px;
+  padding-left: 8px;
+}
+
+.table thead th:last-child {
+  position: sticky;
+  right: 0;
+  background: #003d82;
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+}
+
+.table tbody td:last-child {
+  position: sticky;
+  right: 0;
+  background: white;
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.table tbody tr:hover td:last-child {
+  background: var(--blue-warm-5);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  min-width: 300px;
+}
+
+.action-buttons .btn-sm {
+  white-space: nowrap;
+  min-width: 60px;
+  transition: all 0.2s ease;
+}
+
+.action-buttons .btn-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos específicos por tipo de botão */
+.action-buttons .btn-info,
+.action-buttons-grid .btn-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  border-color: #17a2b8;
+  color: white;
+  font-weight: 600;
+}
+
+.action-buttons .btn-info:hover,
+.action-buttons-grid .btn-info:hover {
+  background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+  border-color: #117a8b;
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+}
+
+.action-buttons .btn-success,
+.action-buttons-grid .btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  border-color: #28a745;
+  color: white;
+  font-weight: 600;
+}
+
+.action-buttons .btn-success:hover,
+.action-buttons-grid .btn-success:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  border-color: #1e7e34;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.action-buttons .btn-secondary {
+  background: #6c757d;
+  border-color: #6c757d;
+}
+
+.action-buttons .btn-secondary:hover {
+  background: #5a6268;
+  border-color: #545b62;
+}
+
+.action-buttons .btn-primary,
+.action-buttons-grid .btn-primary {
+  background: #003d82;
+  border-color: #003d82;
+}
+
+.action-buttons .btn-primary:hover,
+.action-buttons-grid .btn-primary:hover {
+  background: #002850;
+  border-color: #002850;
+}
+
+.action-buttons .btn-danger,
+.action-buttons-grid .btn-danger {
+  background: #dc3545;
+  border-color: #dc3545;
+}
+
+.action-buttons .btn-danger:hover,
+.action-buttons-grid .btn-danger:hover {
+  background: #c82333;
+  border-color: #bd2130;
+}
+
+/* Layout em grade 2x2 para os botões com ícones */
 .action-buttons-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
-  max-width: 280px;
+  max-width: 150px;
   margin: 0 auto;
+  justify-items: stretch;
 }
 
-.action-buttons-grid .btn-sm {
-  padding: 6px 10px;
-  font-size: 13px;
-  white-space: nowrap;
-  text-align: center;
-  justify-content: center;
-  display: flex;
+/* Botões com apenas ícones - Pontes */
+.action-buttons-grid .btn-icon-only {
+  min-width: 36px !important;
+  width: 100%;
+  height: 36px;
+  padding: 0 !important;
+  display: flex !important;
   align-items: center;
+  justify-content: center;
+  font-size: 16px !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  letter-spacing: 0;
+}
+
+/* Ícones SVG dentro de botões - Pontes */
+.action-buttons-grid .btn-icon-only svg {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.action-buttons-grid .btn-icon-only:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.action-buttons-grid .btn-icon-only:active {
+  transform: translateY(0) scale(1);
 }
 
 /* Botão de fotos */
@@ -161,10 +357,99 @@
   transform: translateY(0);
 }
 
+/* Tablets grandes */
+@media (max-width: 1400px) {
+  /* Ocultar coluna de foto em telas médias-grandes */
+  .table th:nth-child(1), /* Foto */
+  .table td:nth-child(1) {
+    display: none;
+  }
+  
+  .table {
+    font-size: 14px;
+    min-width: 950px;
+  }
+  
+  .table thead th:last-child,
+  .table tbody td:last-child {
+    min-width: 155px;
+    max-width: 155px;
+    width: 155px;
+  }
+  
+  .action-buttons-grid {
+    max-width: 145px;
+    gap: 4px;
+  }
+  
+  .action-buttons-grid .btn-icon-only {
+    min-width: 34px !important;
+    width: 100%;
+    height: 34px;
+    font-size: 15px !important;
+  }
+}
+
+/* Tablets e telas médias */
+@media (max-width: 1024px) {
+  /* Ocultar RIO também */
+  .table th:nth-child(4), /* RIO */
+  .table td:nth-child(4) {
+    display: none;
+  }
+  
+  .table {
+    min-width: 750px;
+  }
+  
+  .table thead th:last-child,
+  .table tbody td:last-child {
+    min-width: 150px;
+    max-width: 150px;
+    width: 150px;
+  }
+  
+  .action-buttons {
+    min-width: 200px;
+    gap: 5px;
+  }
+  
+  .action-buttons .btn-sm {
+    min-width: 45px;
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+  
+  .action-buttons-grid {
+    gap: 4px;
+    max-width: 140px;
+  }
+  
+  .action-buttons-grid .btn-icon-only {
+    min-width: 34px !important;
+    width: 100%;
+    height: 34px;
+    font-size: 15px !important;
+  }
+}
+
 /* Responsividade dos botões */
 @media (max-width: 768px) {
+  /* Ajuste em mobile */
+  .table thead th:last-child,
+  .table tbody td:last-child {
+    position: static;
+    box-shadow: none;
+    min-width: 145px;
+    max-width: 145px;
+    width: 145px;
+    text-align: center;
+    padding-right: 6px;
+  }
+  
   .table {
-    font-size: 13px;
+    font-size: 12px;
+    min-width: 500px;
   }
   
   .table th,
@@ -173,60 +458,92 @@
   }
   
   /* Ocultar colunas menos importantes em mobile */
-  .table th:nth-child(5), /* Material */
-  .table td:nth-child(5) {
+  .table th:nth-child(1), /* Foto */
+  .table td:nth-child(1),
+  .table th:nth-child(3), /* RODOVIA */
+  .table td:nth-child(3),
+  .table th:nth-child(4), /* RIO */
+  .table td:nth-child(4),
+  .table th:nth-child(6), /* Material */
+  .table td:nth-child(6),
+  .table th:nth-child(8), /* Coordenadas */
+  .table td:nth-child(8) {
     display: none;
   }
   
-  .table th:nth-child(7), /* Coordenadas */
-  .table td:nth-child(7) {
-    display: none;
-  }
+  /* Mostrar apenas: Nome, KM, Situação, Ações */
   
   .action-buttons {
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     width: 100%;
+    min-width: auto;
+    justify-content: stretch;
   }
   
   .action-buttons .btn-sm {
     width: 100%;
     font-size: 12px;
-    padding: 6px 8px;
+    padding: 8px 12px;
+    min-width: auto;
+    justify-content: center;
+    display: block;
+    text-align: center;
   }
   
-  /* Grid mantém 2 colunas em tablet */
+  /* Grid mantém estrutura em mobile */
   .action-buttons-grid {
-    max-width: 100%;
+    max-width: 135px;
     gap: 4px;
   }
   
-  .action-buttons-grid .btn-sm {
-    font-size: 12px;
-    padding: 6px 8px;
+  .action-buttons-grid .btn-icon-only {
+    min-width: 32px !important;
+    width: 100%;
+    height: 32px;
+    font-size: 14px !important;
   }
 }
 
 @media (max-width: 480px) {
   .table {
-    font-size: 12px;
+    font-size: 11px;
+    min-width: 400px;
   }
   
-  /* Ocultar mais colunas em telas muito pequenas */
-  .table th:nth-child(4), /* KM */
-  .table td:nth-child(4) {
+  .table th,
+  .table td {
+    padding: 6px 3px;
+  }
+  
+  /* Em telas muito pequenas, ocultar KM também */
+  .table th:nth-child(5), /* KM */
+  .table td:nth-child(5) {
     display: none;
   }
   
+  /* Mostrar apenas: Nome, Situação, Ações */
+  
   .action-buttons .btn-sm {
     font-size: 11px;
-    padding: 5px 6px;
+    padding: 7px 10px;
   }
   
-  /* Grid continua 2 colunas mas com texto menor */
-  .action-buttons-grid .btn-sm {
-    font-size: 11px;
-    padding: 5px 6px;
+  .action-buttons-grid {
+    max-width: 130px;
+    gap: 3px;
+  }
+  
+  .action-buttons-grid .btn-icon-only {
+    min-width: 30px !important;
+    width: 100%;
+    height: 30px;
+    font-size: 13px !important;
+  }
+  
+  .badge {
+    font-size: 10px;
+    padding: 3px 8px;
   }
 }
 

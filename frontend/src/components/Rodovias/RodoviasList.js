@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import rodoviaService from '../../services/rodoviaService';
+import ConfirmDeleteModal from '../Modal/ConfirmDeleteModal';
 import './Rodovias.css';
 
 const RodoviasList = () => {
@@ -9,6 +11,7 @@ const RodoviasList = () => {
   const [rodovias, setRodovias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, rodovia: null });
 
   useEffect(() => {
     loadRodovias();
@@ -25,18 +28,26 @@ const RodoviasList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir esta rodovia?')) {
-      try {
-        await rodoviaService.delete(id);
-        toast.success('Rodovia excluída com sucesso!');
-        loadRodovias();
-      } catch (err) {
-        const errorMsg = 'Erro ao excluir rodovia';
-        setError(errorMsg);
-        toast.error(errorMsg);
-      }
+  const handleDeleteClick = (rodovia) => {
+    setDeleteModal({ isOpen: true, rodovia });
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await rodoviaService.delete(deleteModal.rodovia.id);
+      toast.success('Rodovia excluída com sucesso!');
+      setDeleteModal({ isOpen: false, rodovia: null });
+      loadRodovias();
+    } catch (err) {
+      const errorMsg = 'Erro ao excluir rodovia';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      setDeleteModal({ isOpen: false, rodovia: null });
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModal({ isOpen: false, rodovia: null });
   };
 
   if (loading) {
@@ -93,24 +104,27 @@ const RodoviasList = () => {
                       </span>
                     </td>
                     <td>
-                      <div className="action-buttons">
+                      <div className="action-buttons-grid-rodovia">
                         <Link
                           to={`/rodovias/${rodovia.id}`}
-                          className="btn btn-sm btn-secondary"
+                          className="btn btn-sm btn-info btn-ver-full btn-icon-only"
+                          title="Ver detalhes"
                         >
-                          Ver
+                          <Eye size={18} />
                         </Link>
                         <Link
                           to={`/rodovias/${rodovia.id}/editar`}
-                          className="btn btn-sm btn-primary"
+                          className="btn btn-sm btn-primary btn-icon-only"
+                          title="Editar rodovia"
                         >
-                          Editar
+                          <Pencil size={16} />
                         </Link>
                         <button
-                          onClick={() => handleDelete(rodovia.id)}
-                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDeleteClick(rodovia)}
+                          className="btn btn-sm btn-danger btn-icon-only"
+                          title="Excluir rodovia"
                         >
-                          Excluir
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
@@ -121,6 +135,14 @@ const RodoviasList = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName={deleteModal.rodovia?.nome || ''}
+        itemType="rodovia"
+      />
     </div>
   );
 };

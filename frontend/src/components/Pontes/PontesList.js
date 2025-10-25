@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Eye, Camera, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import ponteService from '../../services/ponteService';
+import ConfirmDeleteModal from '../Modal/ConfirmDeleteModal';
 import './Pontes.css';
 
 const PontesList = () => {
@@ -9,6 +11,7 @@ const PontesList = () => {
   const [pontes, setPontes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, ponte: null });
 
   useEffect(() => {
     loadPontes();
@@ -25,18 +28,26 @@ const PontesList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir esta ponte?')) {
-      try {
-        await ponteService.delete(id);
-        toast.success('Ponte excluída com sucesso!');
-        loadPontes();
-      } catch (err) {
-        const errorMsg = 'Erro ao excluir ponte';
-        setError(errorMsg);
-        toast.error(errorMsg);
-      }
+  const handleDeleteClick = (ponte) => {
+    setDeleteModal({ isOpen: true, ponte });
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await ponteService.delete(deleteModal.ponte.id);
+      toast.success('Ponte excluída com sucesso!');
+      setDeleteModal({ isOpen: false, ponte: null });
+      loadPontes();
+    } catch (err) {
+      const errorMsg = 'Erro ao excluir ponte';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      setDeleteModal({ isOpen: false, ponte: null });
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModal({ isOpen: false, ponte: null });
   };
 
   const handleViewPhotos = (ponte) => {
@@ -152,31 +163,31 @@ const PontesList = () => {
                       <div className="action-buttons-grid">
                         <Link
                           to={`/pontes/${ponte.id}`}
-                          className="btn btn-sm btn-secondary"
+                          className="btn btn-sm btn-info btn-icon-only"
                           title="Ver detalhes da ponte"
                         >
-                          Ver
+                          <Eye size={16} />
                         </Link>
                         <button
                           onClick={() => handleViewPhotos(ponte)}
-                          className="btn btn-sm btn-info"
+                          className="btn btn-sm btn-success btn-icon-only"
                           title="Ver fotos da ponte"
                         >
-                          📷 Fotos
+                          <Camera size={16} />
                         </button>
                         <Link
                           to={`/pontes/${ponte.id}/editar`}
-                          className="btn btn-sm btn-primary"
+                          className="btn btn-sm btn-primary btn-icon-only"
                           title="Editar ponte"
                         >
-                          Editar
+                          <Pencil size={16} />
                         </Link>
                         <button
-                          onClick={() => handleDelete(ponte.id)}
-                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDeleteClick(ponte)}
+                          className="btn btn-sm btn-danger btn-icon-only"
                           title="Excluir ponte"
                         >
-                          Excluir
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
@@ -187,6 +198,14 @@ const PontesList = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName={deleteModal.ponte?.nome || ''}
+        itemType="ponte"
+      />
     </div>
   );
 };

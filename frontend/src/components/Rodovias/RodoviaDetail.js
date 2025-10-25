@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Pencil, Trash2, ArrowLeft } from 'lucide-react';
 import rodoviaService from '../../services/rodoviaService';
+import ConfirmDeleteModal from '../Modal/ConfirmDeleteModal';
 import './Rodovias.css';
 
 const RodoviaDetail = () => {
@@ -10,6 +12,7 @@ const RodoviaDetail = () => {
   const [pontes, setPontes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false });
 
   useEffect(() => {
     loadRodovia();
@@ -36,15 +39,23 @@ const RodoviaDetail = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (window.confirm('Tem certeza que deseja excluir esta rodovia?')) {
-      try {
-        await rodoviaService.delete(id);
-        navigate('/rodovias');
-      } catch (err) {
-        setError('Erro ao excluir rodovia');
-      }
+  const handleDeleteClick = () => {
+    setDeleteModal({ isOpen: true });
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await rodoviaService.delete(id);
+      setDeleteModal({ isOpen: false });
+      navigate('/rodovias');
+    } catch (err) {
+      setError('Erro ao excluir rodovia');
+      setDeleteModal({ isOpen: false });
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModal({ isOpen: false });
   };
 
   if (loading) {
@@ -63,15 +74,15 @@ const RodoviaDetail = () => {
     <div className="container">
       <div className="page-header">
         <h1 className="page-title">Detalhes da Rodovia</h1>
-        <div className="action-buttons">
-          <Link to={`/rodovias/${id}/editar`} className="btn btn-primary">
-            Editar
+        <div className="detail-actions">
+          <Link to={`/rodovias/${id}/editar`} className="btn-detail btn-detail-primary">
+            <Pencil size={18} /> Editar
           </Link>
-          <button onClick={handleDelete} className="btn btn-danger">
-            Excluir
+          <button onClick={handleDeleteClick} className="btn-detail btn-detail-danger">
+            <Trash2 size={18} /> Excluir
           </button>
-          <Link to="/rodovias" className="btn btn-secondary">
-            Voltar
+          <Link to="/rodovias" className="btn-detail btn-detail-secondary">
+            <ArrowLeft size={18} /> Voltar
           </Link>
         </div>
       </div>
@@ -169,6 +180,14 @@ const RodoviaDetail = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName={rodovia?.nome || ''}
+        itemType="rodovia"
+      />
     </div>
   );
 };
