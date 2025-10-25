@@ -25,7 +25,11 @@ class PonteController extends Controller
         // Adicionar URL completa da foto
         $pontes->transform(function ($ponte) {
             if ($ponte->foto) {
-                $ponte->foto_url = url('storage/' . $ponte->foto);
+                $baseUrl = config('filesystems.disks.minio.url');
+                $bucket = config('filesystems.disks.minio.bucket');
+                // Codificar corretamente o caminho do arquivo, mantendo as barras
+                $encodedPath = implode('/', array_map('rawurlencode', explode('/', $ponte->foto)));
+                $ponte->foto_url = "{$baseUrl}/{$bucket}/{$encodedPath}";
             }
             return $ponte;
         });
@@ -52,11 +56,12 @@ class PonteController extends Controller
 
         $data = $request->except('foto');
 
-        // Upload da foto
+        // Upload da foto no MinIO
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
             $nomeArquivo = time() . '_' . $foto->getClientOriginalName();
-            $caminhoFoto = $foto->storeAs('pontes', $nomeArquivo, 'public');
+            // Salvar na raiz do bucket (sem prefixo pontes/)
+            $caminhoFoto = $foto->storeAs('', $nomeArquivo, 'minio');
             $data['foto'] = $caminhoFoto;
         }
 
@@ -65,7 +70,10 @@ class PonteController extends Controller
 
         // Adicionar URL completa da foto
         if ($ponte->foto) {
-            $ponte->foto_url = url('storage/' . $ponte->foto);
+            $baseUrl = config('filesystems.disks.minio.url');
+            $bucket = config('filesystems.disks.minio.bucket');
+            $encodedPath = implode('/', array_map('rawurlencode', explode('/', $ponte->foto)));
+            $ponte->foto_url = "{$baseUrl}/{$bucket}/{$encodedPath}";
         }
 
         return response()->json([
@@ -83,7 +91,10 @@ class PonteController extends Controller
         
         // Adicionar URL completa da foto
         if ($ponte->foto) {
-            $ponte->foto_url = url('storage/' . $ponte->foto);
+            $baseUrl = config('filesystems.disks.minio.url');
+            $bucket = config('filesystems.disks.minio.bucket');
+            $encodedPath = implode('/', array_map('rawurlencode', explode('/', $ponte->foto)));
+            $ponte->foto_url = "{$baseUrl}/{$bucket}/{$encodedPath}";
         }
         
         return response()->json($ponte);
@@ -110,16 +121,17 @@ class PonteController extends Controller
 
         $data = $request->except('foto');
 
-        // Upload da nova foto
+        // Upload da nova foto no MinIO
         if ($request->hasFile('foto')) {
             // Deletar foto antiga se existir
-            if ($ponte->foto && Storage::disk('public')->exists($ponte->foto)) {
-                Storage::disk('public')->delete($ponte->foto);
+            if ($ponte->foto && Storage::disk('minio')->exists($ponte->foto)) {
+                Storage::disk('minio')->delete($ponte->foto);
             }
 
             $foto = $request->file('foto');
             $nomeArquivo = time() . '_' . $foto->getClientOriginalName();
-            $caminhoFoto = $foto->storeAs('pontes', $nomeArquivo, 'public');
+            // Salvar na raiz do bucket (sem prefixo pontes/)
+            $caminhoFoto = $foto->storeAs('', $nomeArquivo, 'minio');
             $data['foto'] = $caminhoFoto;
         }
 
@@ -128,7 +140,10 @@ class PonteController extends Controller
 
         // Adicionar URL completa da foto
         if ($ponte->foto) {
-            $ponte->foto_url = url('storage/' . $ponte->foto);
+            $baseUrl = config('filesystems.disks.minio.url');
+            $bucket = config('filesystems.disks.minio.bucket');
+            $encodedPath = implode('/', array_map('rawurlencode', explode('/', $ponte->foto)));
+            $ponte->foto_url = "{$baseUrl}/{$bucket}/{$encodedPath}";
         }
 
         return response()->json([
@@ -144,9 +159,9 @@ class PonteController extends Controller
     {
         $ponte = Ponte::findOrFail($id);
         
-        // Deletar foto se existir
-        if ($ponte->foto && Storage::disk('public')->exists($ponte->foto)) {
-            Storage::disk('public')->delete($ponte->foto);
+        // Deletar foto do MinIO se existir
+        if ($ponte->foto && Storage::disk('minio')->exists($ponte->foto)) {
+            Storage::disk('minio')->delete($ponte->foto);
         }
         
         $ponte->delete();
