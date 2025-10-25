@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ponte;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PonteController extends Controller
 {
@@ -12,7 +13,7 @@ class PonteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Ponte::orderBy('created_at', 'desc');
+        $query = Ponte::with('rodovia')->orderBy('created_at', 'desc');
 
         // Filtrar apenas pontes com coordenadas se solicitado
         if ($request->has('with_coordinates') && $request->with_coordinates) {
@@ -20,6 +21,15 @@ class PonteController extends Controller
         }
 
         $pontes = $query->get();
+        
+        // Adicionar URL completa da foto
+        $pontes->transform(function ($ponte) {
+            if ($ponte->foto) {
+                $ponte->foto_url = url('storage/' . $ponte->foto);
+            }
+            return $ponte;
+        });
+
         return response()->json($pontes);
     }
 
@@ -37,10 +47,26 @@ class PonteController extends Controller
             'longitude' => 'nullable|numeric|between:-180,180',
             'material' => 'required|in:concreto,aço,madeira,misto',
             'situacao' => 'required|in:boa,regular,ruim,interditada',
-            'foto' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB
         ]);
 
-        $ponte = Ponte::create($request->all());
+        $data = $request->except('foto');
+
+        // Upload da foto
+        if ($request->hasFile('foto')) {
+            $foto = $request->file('foto');
+            $nomeArquivo = time() . '_' . $foto->getClientOriginalName();
+            $caminhoFoto = $foto->storeAs('pontes', $nomeArquivo, 'public');
+            $data['foto'] = $caminhoFoto;
+        }
+
+        $ponte = Ponte::create($data);
+        $ponte->load('rodovia');
+
+        // Adicionar URL completa da foto
+        if ($ponte->foto) {
+            $ponte->foto_url = url('storage/' . $ponte->foto);
+        }
 
         return response()->json([
             'message' => 'Ponte criada com sucesso',
@@ -53,7 +79,13 @@ class PonteController extends Controller
      */
     public function show($id)
     {
-        $ponte = Ponte::findOrFail($id);
+        $ponte = Ponte::with('rodovia')->findOrFail($id);
+        
+        // Adicionar URL completa da foto
+        if ($ponte->foto) {
+            $ponte->foto_url = url('storage/' . $ponte->foto);
+        }
+        
         return response()->json($ponte);
     }
 
@@ -73,10 +105,31 @@ class PonteController extends Controller
             'longitude' => 'nullable|numeric|between:-180,180',
             'material' => 'sometimes|required|in:concreto,aço,madeira,misto',
             'situacao' => 'sometimes|required|in:boa,regular,ruim,interditada',
-            'foto' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB
         ]);
 
-        $ponte->update($request->all());
+        $data = $request->except('foto');
+
+        // Upload da nova foto
+        if ($request->hasFile('foto')) {
+            // Deletar foto antiga se existir
+            if ($ponte->foto && Storage::disk('public')->exists($ponte->foto)) {
+                Storage::disk('public')->delete($ponte->foto);
+            }
+
+            $foto = $request->file('foto');
+            $nomeArquivo = time() . '_' . $foto->getClientOriginalName();
+            $caminhoFoto = $foto->storeAs('pontes', $nomeArquivo, 'public');
+            $data['foto'] = $caminhoFoto;
+        }
+
+        $ponte->update($data);
+        $ponte->load('rodovia');
+
+        // Adicionar URL completa da foto
+        if ($ponte->foto) {
+            $ponte->foto_url = url('storage/' . $ponte->foto);
+        }
 
         return response()->json([
             'message' => 'Ponte atualizada com sucesso',
@@ -90,6 +143,12 @@ class PonteController extends Controller
     public function destroy($id)
     {
         $ponte = Ponte::findOrFail($id);
+        
+        // Deletar foto se existir
+        if ($ponte->foto && Storage::disk('public')->exists($ponte->foto)) {
+            Storage::disk('public')->delete($ponte->foto);
+        }
+        
         $ponte->delete();
 
         return response()->json([

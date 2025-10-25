@@ -40,13 +40,11 @@ const PontesList = () => {
   };
 
   const handleViewPhotos = (ponte) => {
-    // Por enquanto, apenas uma mensagem informativa
-    // Futuramente aqui abrirá uma galeria de fotos
-    if (ponte.foto) {
-      toast.info('Visualizando fotos da ponte');
-      // TODO: Implementar galeria de fotos
+    if (ponte.foto_url) {
+      // Abrir imagem em nova aba
+      window.open(ponte.foto_url, '_blank');
     } else {
-      toast.info('Esta ponte ainda não possui fotos cadastradas');
+      toast.info('Esta ponte ainda não possui foto cadastrada');
     }
   };
 
@@ -74,6 +72,7 @@ const PontesList = () => {
           <table className="table">
             <thead>
               <tr>
+                <th>Foto</th>
                 <th>Nome</th>
                 <th>Rodovia</th>
                 <th>Rio</th>
@@ -87,13 +86,47 @@ const PontesList = () => {
             <tbody>
               {pontes.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center">
+                  <td colSpan="9" className="text-center">
                     Nenhuma ponte cadastrada
                   </td>
                 </tr>
               ) : (
                 pontes.map((ponte) => (
                   <tr key={ponte.id}>
+                    <td>
+                      {ponte.foto_url ? (
+                        <img
+                          src={ponte.foto_url}
+                          alt={ponte.nome}
+                          style={{
+                            width: '60px',
+                            height: '60px',
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            border: '2px solid #ddd',
+                          }}
+                          onClick={() => handleViewPhotos(ponte)}
+                          title="Clique para ver em tamanho maior"
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '60px',
+                            height: '60px',
+                            backgroundColor: '#f0f0f0',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#999',
+                            fontSize: '24px',
+                          }}
+                        >
+                          🌉
+                        </div>
+                      )}
+                    </td>
                     <td>
                       <strong>{ponte.nome}</strong>
                     </td>

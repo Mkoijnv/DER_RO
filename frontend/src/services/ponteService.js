@@ -12,12 +12,41 @@ const ponteService = {
   },
 
   create: async (data) => {
-    const response = await api.post('/pontes', data);
+    const formData = new FormData();
+    
+    // Adicionar todos os campos ao FormData
+    Object.keys(data).forEach(key => {
+      if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
+        formData.append(key, data[key]);
+      }
+    });
+
+    const response = await api.post('/pontes', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 
   update: async (id, data) => {
-    const response = await api.put(`/pontes/${id}`, data);
+    const formData = new FormData();
+    
+    // Adicionar todos os campos ao FormData
+    Object.keys(data).forEach(key => {
+      if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
+        formData.append(key, data[key]);
+      }
+    });
+
+    // Laravel não suporta PUT com FormData nativamente, usar POST com _method
+    formData.append('_method', 'PUT');
+
+    const response = await api.post(`/pontes/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 

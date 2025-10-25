@@ -1,31 +1,89 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 import ponteService from '../../services/ponteService';
-import 'leaflet/dist/leaflet.css';
 import './MapView.css';
-import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-// Fix para ícones do Leaflet não aparecerem
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+// Importação segura do Leaflet
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+
+// Configuração do ícone padrão do Leaflet
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  iconRetinaUrl: iconRetina,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
+
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Componente para controlar o mapa programaticamente
+function MapController({ center, zoom, ponteAtual }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (center && ponteAtual) {
+      map.flyTo(center, zoom, {
+        duration: 1.5,
+        easeLinearity: 0.25
+      });
+    }
+  }, [center, zoom, map, ponteAtual]);
+  
+  return null;
+}
 
 const MapView = () => {
   const [pontes, setPontes] = useState([]);
+  const [pontesFiltradas, setPontesFiltradas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [indiceAtual, setIndiceAtual] = useState(-1);
+  const [filtros, setFiltros] = useState({
+    busca: '',
+    situacao: '',
+  });
+  const markersRef = useRef({});
 
-  // Centro do Brasil como posição padrão
-  const defaultCenter = [-14.235004, -51.92528];
-  const defaultZoom = 4;
+  // Centro padrão (Rondônia)
+  const defaultCenter = [-10.9472, -62.8264];
+  const defaultZoom = 7;
+  const detailZoom = 13;
 
   useEffect(() => {
     loadPontes();
   }, []);
+
+  useEffect(() => {
+    aplicarFiltros();
+  }, [pontes, filtros]);
+
+  // Abrir popup da ponte selecionada e fechar os outros
+  useEffect(() => {
+    // Fechar todos os popups primeiro
+    Object.values(markersRef.current).forEach((marker) => {
+      if (marker && marker.closePopup) {
+        marker.closePopup();
+      }
+    });
+
+    // Abrir o popup da ponte selecionada
+    if (indiceAtual >= 0 && markersRef.current[indiceAtual]) {
+      const marker = markersRef.current[indiceAtual];
+      if (marker && marker.openPopup) {
+        setTimeout(() => {
+          marker.openPopup();
+        }, 100);
+      }
+    }
+  }, [indiceAtual]);
 
   const loadPontes = async () => {
     try {
@@ -35,12 +93,81 @@ const MapView = () => {
         (ponte) => ponte.latitude && ponte.longitude
       );
       setPontes(pontesComCoordenadas);
+      setPontesFiltradas(pontesComCoordenadas);
       setLoading(false);
     } catch (err) {
       setError('Erro ao carregar pontes');
       setLoading(false);
     }
   };
+
+  const aplicarFiltros = () => {
+    let resultado = [...pontes];
+
+    // Filtro de busca (nome, rodovia, rio)
+    if (filtros.busca) {
+      const termoBusca = filtros.busca.toLowerCase();
+      resultado = resultado.filter(ponte =>
+        ponte.nome.toLowerCase().includes(termoBusca) ||
+        ponte.rio.toLowerCase().includes(termoBusca) ||
+        ponte.rodovia?.nome?.toLowerCase().includes(termoBusca)
+      );
+    }
+
+    // Filtro de situação
+    if (filtros.situacao) {
+      resultado = resultado.filter(ponte => ponte.situacao === filtros.situacao);
+    }
+
+    setPontesFiltradas(resultado);
+    
+    // Resetar índice se não houver mais resultados
+    if (resultado.length === 0) {
+      setIndiceAtual(-1);
+    } else if (indiceAtual >= resultado.length) {
+      setIndiceAtual(0);
+    }
+  };
+
+  const handleFiltroChange = (e) => {
+    const { name, value } = e.target;
+    setFiltros({
+      ...filtros,
+      [name]: value,
+    });
+    setIndiceAtual(-1); // Resetar seleção ao mudar filtros
+  };
+
+  const handleLimparFiltros = () => {
+    setFiltros({
+      busca: '',
+      situacao: '',
+    });
+    setIndiceAtual(-1);
+  };
+
+  const handleProximaPonte = () => {
+    if (pontesFiltradas.length === 0) return;
+    
+    const novoIndice = indiceAtual < pontesFiltradas.length - 1 ? indiceAtual + 1 : 0;
+    setIndiceAtual(novoIndice);
+  };
+
+  const handlePonteAnterior = () => {
+    if (pontesFiltradas.length === 0) return;
+    
+    const novoIndice = indiceAtual > 0 ? indiceAtual - 1 : pontesFiltradas.length - 1;
+    setIndiceAtual(novoIndice);
+  };
+
+  const handleSelecionarPonte = (index) => {
+    setIndiceAtual(index);
+  };
+
+  const ponteAtual = indiceAtual >= 0 ? pontesFiltradas[indiceAtual] : null;
+  const centerAtual = ponteAtual 
+    ? [parseFloat(ponteAtual.latitude), parseFloat(ponteAtual.longitude)]
+    : defaultCenter;
 
   if (loading) {
     return (
@@ -53,79 +180,272 @@ const MapView = () => {
   return (
     <div className="container">
       <div className="page-header">
-        <h1 className="page-title">Mapa de Pontes</h1>
+        <h1 className="page-title">🗺️ Mapa de Pontes</h1>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
 
-      <div className="card">
-        <div className="map-info-bar">
-          <div className="map-stats">
-            <span className="stat-item">
-              📍 <strong>{pontes.length}</strong> pontes localizadas
-            </span>
-          </div>
-          <div className="map-legend">
-            <span className="legend-item">
-              <span className="legend-marker"></span>
-              Localização das pontes
-            </span>
-          </div>
-        </div>
+      {/* Painel de Filtros */}
+      <div className="card" style={{ marginBottom: '20px' }}>
+        <div className="filter-panel">
+          <div className="filter-row">
+            <div className="filter-group" style={{ flex: 2 }}>
+              <label className="filter-label">🔍 Buscar</label>
+              <input
+                type="text"
+                name="busca"
+                className="form-control"
+                placeholder="Nome da ponte, rodovia ou rio..."
+                value={filtros.busca}
+                onChange={handleFiltroChange}
+              />
+            </div>
 
-        <div className="map-container">
-          <MapContainer
-            center={defaultCenter}
-            zoom={defaultZoom}
-            style={{ height: '600px', width: '100%', borderRadius: '8px' }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            
-            {pontes.map((ponte) => (
-              <Marker
-                key={ponte.id}
-                position={[parseFloat(ponte.latitude), parseFloat(ponte.longitude)]}
+            <div className="filter-group">
+              <label className="filter-label">📊 Situação</label>
+              <select
+                name="situacao"
+                className="form-control"
+                value={filtros.situacao}
+                onChange={handleFiltroChange}
               >
-                <Popup>
-                  <div className="map-popup">
-                    <h3>{ponte.nome}</h3>
-                    <div className="popup-info">
-                      <p><strong>Rodovia:</strong> {ponte.rodovia?.rodovia || 'N/A'}</p>
-                      <p><strong>Rio:</strong> {ponte.rio}</p>
-                      <p><strong>KM:</strong> {ponte.km}</p>
-                      <p><strong>Material:</strong> {ponte.material}</p>
-                      <p>
-                        <strong>Situação:</strong>{' '}
-                        <span className={`badge badge-${ponte.situacao?.toLowerCase()}`}>
-                          {ponte.situacao}
-                        </span>
-                      </p>
-                    </div>
-                    <Link to={`/pontes/${ponte.id}`} className="btn btn-sm btn-primary">
-                      Ver Detalhes
-                    </Link>
+                <option value="">Todas</option>
+                <option value="boa">Boa</option>
+                <option value="regular">Regular</option>
+                <option value="ruim">Ruim</option>
+                <option value="interditada">Interditada</option>
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label className="filter-label" style={{ opacity: 0 }}>.</label>
+              <button
+                onClick={handleLimparFiltros}
+                className="btn btn-secondary"
+                style={{ width: '100%' }}
+              >
+                🗑️ Limpar
+              </button>
+            </div>
+          </div>
+
+          <div className="filter-info">
+            <span className="info-badge">
+              📍 {pontesFiltradas.length} de {pontes.length} pontes
+            </span>
+            {ponteAtual && (
+              <span className="info-badge info-badge-active">
+                ⭐ {ponteAtual.nome}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="map-layout">
+        {/* Lista de Pontes Lateral */}
+        <div className="pontes-sidebar">
+          <div className="sidebar-header">
+            <h3>Pontes Encontradas</h3>
+            {pontesFiltradas.length > 0 && (
+              <div className="navigation-controls">
+                <button
+                  onClick={handlePonteAnterior}
+                  className="nav-btn nav-btn-prev"
+                  title="Ponte Anterior"
+                >
+                  ⬅️
+                </button>
+                <span className="nav-counter">
+                  {indiceAtual >= 0 ? indiceAtual + 1 : '-'} / {pontesFiltradas.length}
+                </span>
+                <button
+                  onClick={handleProximaPonte}
+                  className="nav-btn nav-btn-next"
+                  title="Próxima Ponte"
+                >
+                  ➡️
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="pontes-list">
+            {pontesFiltradas.length === 0 ? (
+              <div className="empty-results">
+                <p>🔍 Nenhuma ponte encontrada</p>
+                <small>Tente ajustar os filtros</small>
+              </div>
+            ) : (
+              pontesFiltradas.map((ponte, index) => (
+                <div
+                  key={ponte.id}
+                  className={`ponte-item ${index === indiceAtual ? 'ponte-item-active' : ''}`}
+                  onClick={() => handleSelecionarPonte(index)}
+                >
+                  <div className="ponte-item-header">
+                    <h4>{ponte.nome}</h4>
+                    <span className={`badge badge-${ponte.situacao?.toLowerCase()}`}>
+                      {ponte.situacao}
+                    </span>
                   </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+                  <div className="ponte-item-info">
+                    <p>🛣️ {ponte.rodovia?.nome || 'N/A'} - KM {ponte.km}</p>
+                    <p>🌊 {ponte.rio}</p>
+                    <p>📍 {parseFloat(ponte.latitude).toFixed(4)}, {parseFloat(ponte.longitude).toFixed(4)}</p>
+                  </div>
+                  {index === indiceAtual && (
+                    <div className="ponte-item-actions">
+                      <Link
+                        to={`/pontes/${ponte.id}`}
+                        className="btn btn-sm btn-primary"
+                        style={{ width: '100%' }}
+                      >
+                        Ver Detalhes
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        {pontes.length === 0 && (
-          <div className="empty-map-message">
-            <p>Nenhuma ponte com coordenadas cadastradas ainda.</p>
-            <Link to="/pontes/nova" className="btn btn-primary">
-              Cadastrar Ponte
-            </Link>
+        {/* Mapa */}
+        <div className="map-wrapper">
+          <div className="map-container">
+            {pontes.length === 0 ? (
+              <div className="empty-map-message">
+                <p>Nenhuma ponte com coordenadas cadastradas ainda.</p>
+                <Link to="/pontes/nova" className="btn btn-primary">
+                  Cadastrar Ponte
+                </Link>
+              </div>
+            ) : (
+              <MapContainer
+                center={defaultCenter}
+                zoom={defaultZoom}
+                style={{ height: '100%', width: '100%', borderRadius: '8px' }}
+                scrollWheelZoom={true}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                
+                <MapController 
+                  center={centerAtual} 
+                  zoom={ponteAtual ? detailZoom : defaultZoom}
+                  ponteAtual={ponteAtual}
+                />
+                
+                {pontesFiltradas.map((ponte, index) => {
+                  const isSelecionada = index === indiceAtual;
+                  
+                  return (
+                    <Marker
+                      key={ponte.id}
+                      position={[parseFloat(ponte.latitude), parseFloat(ponte.longitude)]}
+                      eventHandlers={{
+                        click: () => handleSelecionarPonte(index),
+                      }}
+                      ref={(ref) => {
+                        if (ref) {
+                          markersRef.current[index] = ref;
+                        }
+                      }}
+                    >
+                      <Popup
+                        autoClose={false}
+                        closeOnClick={false}
+                      >
+                        <div className={`map-popup ${isSelecionada ? 'map-popup-selected' : ''}`}>
+                          <h3>{ponte.nome}</h3>
+                          {isSelecionada && (
+                            <div className="selected-badge">
+                              ⭐ Ponte Selecionada
+                            </div>
+                          )}
+                          
+                          {/* Exibir foto da ponte se existir */}
+                          {ponte.foto_url && (
+                            <div className="popup-image">
+                              <img 
+                                src={ponte.foto_url} 
+                                alt={ponte.nome}
+                                style={{
+                                  width: '100%',
+                                  maxHeight: '150px',
+                                  objectFit: 'cover',
+                                  borderRadius: '6px',
+                                  marginBottom: '12px',
+                                  cursor: 'pointer',
+                                  border: '2px solid #e5e7eb'
+                                }}
+                                onClick={() => window.open(ponte.foto_url, '_blank')}
+                                title="Clique para ver em tamanho maior"
+                              />
+                            </div>
+                          )}
+                          
+                          <div className="popup-info">
+                            <p><strong>Rodovia:</strong> {ponte.rodovia?.nome || 'N/A'}</p>
+                            <p><strong>Rio:</strong> {ponte.rio}</p>
+                            <p><strong>KM:</strong> {ponte.km}</p>
+                            <p><strong>Material:</strong> {ponte.material}</p>
+                            <p>
+                              <strong>Situação:</strong>{' '}
+                              <span className={`badge badge-${ponte.situacao?.toLowerCase()}`}>
+                                {ponte.situacao}
+                              </span>
+                            </p>
+                          </div>
+                          <Link to={`/pontes/${ponte.id}`} className="btn btn-sm btn-primary" style={{ width: '100%' }}>
+                            Ver Detalhes Completos
+                          </Link>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+              </MapContainer>
+            )}
           </div>
-        )}
+
+          {/* Controles de Navegação Flutuantes */}
+          {pontesFiltradas.length > 0 && (
+            <div className="floating-controls">
+              <button
+                onClick={handlePonteAnterior}
+                className="floating-btn floating-btn-left"
+                title="Ponte Anterior (←)"
+              >
+                ⬅️
+              </button>
+              <div className="floating-info">
+                {indiceAtual >= 0 ? (
+                  <>
+                    <strong>{indiceAtual + 1}</strong> / {pontesFiltradas.length}
+                    <br />
+                    <small>{ponteAtual?.nome}</small>
+                  </>
+                ) : (
+                  <small>Selecione uma ponte</small>
+                )}
+              </div>
+              <button
+                onClick={handleProximaPonte}
+                className="floating-btn floating-btn-right"
+                title="Próxima Ponte (→)"
+              >
+                ➡️
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default MapView;
-

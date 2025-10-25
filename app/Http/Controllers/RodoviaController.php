@@ -31,7 +31,6 @@ class RodoviaController extends Controller
     {
         $request->validate([
             'nome' => 'required|string|max:255',
-            'estado_id' => 'nullable|exists:estados,id',
             'trecho_inicial' => 'nullable|string|max:255',
             'trecho_final' => 'nullable|string|max:255',
             'extensao_km' => 'nullable|numeric|min:0',
@@ -87,7 +86,6 @@ class RodoviaController extends Controller
 
         $request->validate([
             'nome' => 'sometimes|required|string|max:255',
-            'estado_id' => 'sometimes|nullable|exists:estados,id',
             'trecho_inicial' => 'sometimes|nullable|string|max:255',
             'trecho_final' => 'sometimes|nullable|string|max:255',
             'extensao_km' => 'sometimes|nullable|numeric|min:0',

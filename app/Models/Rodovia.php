@@ -11,7 +11,6 @@ class Rodovia extends Model
 
     protected $fillable = [
         'nome',
-        'estado_id',
         'trecho_inicial',
         'trecho_final',
         'extensao_km',

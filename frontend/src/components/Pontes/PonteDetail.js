@@ -198,11 +198,20 @@ const PonteDetail = () => {
         </div>
       )}
 
-      {ponte.foto && (
+      {ponte.foto_url && (
         <div className="card">
-          <h2 className="card-header">Foto</h2>
-          <div className="ponte-foto">
-            <img src={ponte.foto} alt={ponte.nome} />
+          <h2 className="card-header">📷 Foto da Ponte</h2>
+          <div className="ponte-foto" style={{ textAlign: 'center', padding: '20px' }}>
+            <img 
+              src={ponte.foto_url} 
+              alt={ponte.nome}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '600px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              }}
+            />
           </div>
         </div>
       )}

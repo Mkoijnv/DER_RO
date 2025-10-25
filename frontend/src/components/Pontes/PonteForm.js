@@ -26,6 +26,9 @@ const PonteForm = () => {
   const [rodovias, setRodovias] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fotoFile, setFotoFile] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState(null);
+  const [fotoExistente, setFotoExistente] = useState(null);
 
   useEffect(() => {
     loadRodovias();
@@ -56,6 +59,11 @@ const PonteForm = () => {
         material: data.material || 'concreto',
         situacao: data.situacao || 'boa',
       });
+      
+      // Carregar foto existente se houver
+      if (data.foto_url) {
+        setFotoExistente(data.foto_url);
+      }
     } catch (err) {
       setError('Erro ao carregar ponte');
     }
@@ -68,17 +76,60 @@ const PonteForm = () => {
     });
   };
 
+  const handleFotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tamanho (máx 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('A imagem deve ter no máximo 5MB');
+        return;
+      }
+
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        toast.error('Por favor, selecione uma imagem válida');
+        return;
+      }
+
+      setFotoFile(file);
+
+      // Criar preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoverFoto = () => {
+    setFotoFile(null);
+    setFotoPreview(null);
+    // Limpar o input file
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      const dataToSend = { ...formData };
+      
+      // Adicionar foto se houver
+      if (fotoFile) {
+        dataToSend.foto = fotoFile;
+      }
+
       if (isEdit) {
-        await ponteService.update(id, formData);
+        await ponteService.update(id, dataToSend);
         toast.success('Ponte atualizada com sucesso!');
       } else {
-        await ponteService.create(formData);
+        await ponteService.create(dataToSend);
         toast.success('Ponte criada com sucesso!');
       }
       setTimeout(() => navigate('/pontes'), 500);
@@ -226,6 +277,68 @@ const PonteForm = () => {
                 <option value="interditada">Interditada</option>
               </select>
             </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Foto da Ponte</label>
+            <input
+              type="file"
+              className="form-control"
+              accept="image/*"
+              onChange={handleFotoChange}
+            />
+            <small className="form-text">
+              Formatos aceitos: JPG, PNG, GIF, WebP. Tamanho máximo: 5MB
+            </small>
+
+            {/* Preview da foto nova */}
+            {fotoPreview && (
+              <div className="image-preview-container" style={{ marginTop: '15px' }}>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <img
+                    src={fotoPreview}
+                    alt="Preview"
+                    style={{
+                      maxWidth: '300px',
+                      maxHeight: '300px',
+                      borderRadius: '8px',
+                      border: '2px solid #ddd',
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoverFoto}
+                    className="btn btn-sm btn-danger"
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                    }}
+                  >
+                    ✕ Remover
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Foto existente (apenas no modo edição) */}
+            {!fotoPreview && fotoExistente && isEdit && (
+              <div className="image-preview-container" style={{ marginTop: '15px' }}>
+                <p style={{ color: '#666', fontSize: '14px', marginBottom: '8px' }}>
+                  Foto atual:
+                </p>
+                <img
+                  src={fotoExistente}
+                  alt="Foto atual da ponte"
+                  style={{
+                    maxWidth: '300px',
+                    maxHeight: '300px',
+                    borderRadius: '8px',
+                    border: '2px solid #ddd',
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div className="form-actions">
