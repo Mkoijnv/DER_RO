@@ -7,6 +7,7 @@ use App\Http\Controllers\RodoviaController;
 use App\Http\Controllers\PonteController;
 use App\Http\Controllers\EstadoController;
 use App\Http\Controllers\MunicipioController;
+use App\Http\Controllers\ApiDocumentationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,35 +15,8 @@ use App\Http\Controllers\MunicipioController;
 |--------------------------------------------------------------------------
 */
 
-// Rota de teste / health check
-Route::get('/', function () {
-    return response()->json([
-        'status' => 'ok',
-        'message' => 'API do Sistema de Rodovias e Pontes está funcionando!',
-        'version' => '1.0.0',
-        'endpoints' => [
-            'auth' => [
-                'POST /api/register' => 'Criar nova conta',
-                'POST /api/login' => 'Fazer login',
-                'POST /api/logout' => 'Fazer logout (requer autenticação)',
-            ],
-            'rodovias' => [
-                'GET /api/rodovias' => 'Listar todas as rodovias',
-                'POST /api/rodovias' => 'Criar nova rodovia',
-                'GET /api/rodovias/{id}' => 'Ver detalhes da rodovia',
-                'PUT /api/rodovias/{id}' => 'Atualizar rodovia',
-                'DELETE /api/rodovias/{id}' => 'Excluir rodovia',
-            ],
-            'pontes' => [
-                'GET /api/pontes' => 'Listar todas as pontes',
-                'POST /api/pontes' => 'Criar nova ponte',
-                'GET /api/pontes/{id}' => 'Ver detalhes da ponte',
-                'PUT /api/pontes/{id}' => 'Atualizar ponte',
-                'DELETE /api/pontes/{id}' => 'Excluir ponte',
-            ]
-        ]
-    ]);
-});
+// Documentação da API
+Route::get('/', [ApiDocumentationController::class, 'index']);
 
 // Rotas públicas de autenticação
 Route::post('/register', [AuthController::class, 'register']);
