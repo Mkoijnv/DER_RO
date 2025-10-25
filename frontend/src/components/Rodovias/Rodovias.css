@@ -7,6 +7,10 @@
   gap: 16px;
 }
 
+.page-header .btn {
+  white-space: nowrap;
+}
+
 .page-title {
   font-size: 32px;
   font-weight: 700;
@@ -17,6 +21,41 @@
 .table-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Larguras das colunas de Rodovias */
+.table thead th:nth-child(1), /* Rodovia */
+.table tbody td:nth-child(1) {
+  width: 180px;
+  min-width: 180px;
+}
+
+.table thead th:nth-child(2), /* Trecho Inicial */
+.table tbody td:nth-child(2) {
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+}
+
+.table thead th:nth-child(3), /* Trecho Final */
+.table tbody td:nth-child(3) {
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+}
+
+.table thead th:nth-child(4), /* Extensão */
+.table tbody td:nth-child(4) {
+  width: 130px;
+  min-width: 130px;
+  text-align: center;
+}
+
+.table thead th:nth-child(5), /* Situação */
+.table tbody td:nth-child(5) {
+  width: 150px;
+  min-width: 150px;
+  text-align: center;
 }
 
 /* Garantir largura mínima para a coluna de ações */

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, Camera, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Camera, Pencil, Trash2, Download } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import ponteService from '../../services/ponteService';
 import ConfirmDeleteModal from '../Modal/ConfirmDeleteModal';
@@ -59,6 +59,44 @@ const PontesList = () => {
     }
   };
 
+  const exportToCSV = () => {
+    // Cabeçalhos da tabela
+    const headers = ['Nome', 'Rodovia', 'RIO', 'KM', 'Material', 'Situação', 'Coordenadas'];
+    
+    // Dados das pontes
+    const data = pontes.map(ponte => [
+      ponte.nome || '',
+      ponte.rodovia?.nome || '',
+      ponte.rio || '',
+      ponte.km || '',
+      ponte.material || '',
+      ponte.situacao || '',
+      ponte.latitude && ponte.longitude ? `${ponte.latitude}, ${ponte.longitude}` : ''
+    ]);
+    
+    // Combinar cabeçalhos e dados
+    const csvContent = [
+      headers.join(';'),
+      ...data.map(row => row.join(';'))
+    ].join('\n');
+    
+    // Adicionar BOM para UTF-8 (garante acentuação correta no Excel)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // Criar link de download
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `pontes_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Tabela exportada com sucesso!');
+  };
+
   if (loading) {
     return (
       <div className="loading">
@@ -71,9 +109,14 @@ const PontesList = () => {
     <div className="container">
       <div className="page-header">
         <h1 className="page-title">Pontes</h1>
-        <Link to="/pontes/nova" className="btn btn-primary">
-          + Nova Ponte
-        </Link>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={exportToCSV} className="btn btn-success" title="Exportar tabela para CSV">
+            <Download size={18} /> Exportar
+          </button>
+          <Link to="/pontes/nova" className="btn btn-primary">
+            + Nova Ponte
+          </Link>
+        </div>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}

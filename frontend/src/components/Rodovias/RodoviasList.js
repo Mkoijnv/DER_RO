@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2, Download } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import rodoviaService from '../../services/rodoviaService';
 import ConfirmDeleteModal from '../Modal/ConfirmDeleteModal';
@@ -50,6 +50,42 @@ const RodoviasList = () => {
     setDeleteModal({ isOpen: false, rodovia: null });
   };
 
+  const exportToCSV = () => {
+    // Cabeçalhos da tabela
+    const headers = ['Rodovia', 'Trecho Inicial', 'Trecho Final', 'Extensão (km)', 'Situação'];
+    
+    // Dados das rodovias
+    const data = rodovias.map(rodovia => [
+      rodovia.nome || '',
+      rodovia.trecho_inicial || '',
+      rodovia.trecho_final || '',
+      rodovia.extensao_km || '',
+      rodovia.situacao || ''
+    ]);
+    
+    // Combinar cabeçalhos e dados
+    const csvContent = [
+      headers.join(';'),
+      ...data.map(row => row.join(';'))
+    ].join('\n');
+    
+    // Adicionar BOM para UTF-8 (garante acentuação correta no Excel)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // Criar link de download
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `rodovias_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Tabela exportada com sucesso!');
+  };
+
   if (loading) {
     return (
       <div className="loading">
@@ -62,9 +98,14 @@ const RodoviasList = () => {
     <div className="container">
       <div className="page-header">
         <h1 className="page-title">Rodovias</h1>
-        <Link to="/rodovias/nova" className="btn btn-primary">
-          + Nova Rodovia
-        </Link>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={exportToCSV} className="btn btn-success" title="Exportar tabela para CSV">
+            <Download size={18} /> Exportar
+          </button>
+          <Link to="/rodovias/nova" className="btn btn-primary">
+            + Nova Rodovia
+          </Link>
+        </div>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
