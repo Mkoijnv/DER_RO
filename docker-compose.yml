@@ -20,6 +20,9 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./:/var/www/html
+    depends_on:
+      - mysql
+      - redis
     networks:
       - laravel-network
 
@@ -76,6 +79,21 @@ services:
     stdin_open: true
     tty: true
 
+  # Redis - Cache e Sessões
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - laravel-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   # MinIO - Object Storage (S3 Compatible)
   minio:
     image: minio/minio:latest
@@ -98,6 +116,7 @@ services:
 
 volumes:
   mysql_data:
+  redis_data:
   minio_data:
 
 networks:

@@ -28,6 +28,9 @@ Route::get('/estados/{id}', [EstadoController::class, 'show']);
 Route::get('/estados/{id}/municipios', [EstadoController::class, 'municipios']);
 Route::get('/municipios', [MunicipioController::class, 'index']);
 
+// Rota de teste/ping
+Route::get('/ping', fn() => response()->json(['pong' => now(), 'cache' => cache()->get('teste')]));
+
 // Rotas protegidas por autenticação
 Route::middleware('auth:sanctum')->group(function () {
     // Autenticação

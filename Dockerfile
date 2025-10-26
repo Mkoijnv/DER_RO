@@ -43,13 +43,6 @@ WORKDIR /var/www/html
 # Copiar arquivos do projeto
 COPY --chown=laravel:laravel . .
 
-# Copiar script de entrada
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Tornar scripts executáveis
-RUN chmod +x /var/www/html/init-backend.sh || true
-
 # Criar diretórios necessários com permissões corretas
 RUN mkdir -p /var/www/html/storage/framework/cache \
     /var/www/html/storage/framework/sessions \
@@ -67,4 +60,4 @@ EXPOSE 9000
 
 USER laravel
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["php-fpm"]
