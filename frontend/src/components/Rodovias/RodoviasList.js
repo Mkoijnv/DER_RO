@@ -28,8 +28,24 @@ const RodoviasList = () => {
     }
   };
 
-  const handleDeleteClick = (rodovia) => {
-    setDeleteModal({ isOpen: true, rodovia });
+  const handleDeleteClick = async (rodovia) => {
+    // Buscar as pontes da rodovia antes de mostrar o modal
+    try {
+      const data = await rodoviaService.getRodoviaWithPontes(rodovia.id);
+      const pontes = data.pontes || [];
+      setDeleteModal({ 
+        isOpen: true, 
+        rodovia,
+        relatedItems: pontes
+      });
+    } catch (err) {
+      // Se falhar ao buscar pontes, abre o modal mesmo assim
+      setDeleteModal({ 
+        isOpen: true, 
+        rodovia,
+        relatedItems: []
+      });
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -183,6 +199,7 @@ const RodoviasList = () => {
         onConfirm={handleConfirmDelete}
         itemName={deleteModal.rodovia?.nome || ''}
         itemType="rodovia"
+        relatedItems={deleteModal.relatedItems}
       />
     </div>
   );

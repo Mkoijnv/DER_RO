@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Pencil, Trash2, ArrowLeft } from 'lucide-react';
+import { Pencil, Trash2, ArrowLeft, Eye } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import rodoviaService from '../../services/rodoviaService';
+import ponteService from '../../services/ponteService';
 import ConfirmDeleteModal from '../Modal/ConfirmDeleteModal';
 import './Rodovias.css';
 
 const RodoviaDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [rodovia, setRodovia] = useState(null);
   const [pontes, setPontes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [deleteModal, setDeleteModal] = useState({ isOpen: false });
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, type: 'rodovia', item: null });
 
   useEffect(() => {
     loadRodovia();
@@ -40,22 +43,41 @@ const RodoviaDetail = () => {
   };
 
   const handleDeleteClick = () => {
-    setDeleteModal({ isOpen: true });
+    setDeleteModal({ 
+      isOpen: true, 
+      type: 'rodovia', 
+      item: rodovia,
+      relatedItems: pontes // Pontes que serão excluídas junto
+    });
+  };
+
+  const handleDeletePonteClick = (ponte) => {
+    setDeleteModal({ isOpen: true, type: 'ponte', item: ponte });
   };
 
   const handleConfirmDelete = async () => {
     try {
-      await rodoviaService.delete(id);
-      setDeleteModal({ isOpen: false });
-      navigate('/rodovias');
+      if (deleteModal.type === 'rodovia') {
+        await rodoviaService.delete(id);
+        toast.success('Rodovia excluída com sucesso!');
+        setDeleteModal({ isOpen: false, type: 'rodovia', item: null });
+        navigate('/rodovias');
+      } else if (deleteModal.type === 'ponte') {
+        await ponteService.delete(deleteModal.item.id);
+        toast.success('Ponte excluída com sucesso!');
+        setDeleteModal({ isOpen: false, type: 'ponte', item: null });
+        loadPontes(); // Recarregar lista de pontes
+      }
     } catch (err) {
-      setError('Erro ao excluir rodovia');
-      setDeleteModal({ isOpen: false });
+      const errorMsg = deleteModal.type === 'rodovia' ? 'Erro ao excluir rodovia' : 'Erro ao excluir ponte';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      setDeleteModal({ isOpen: false, type: 'rodovia', item: null });
     }
   };
 
   const handleCancelDelete = () => {
-    setDeleteModal({ isOpen: false });
+    setDeleteModal({ isOpen: false, type: 'rodovia', item: null });
   };
 
   if (loading) {
@@ -166,12 +188,29 @@ const RodoviaDetail = () => {
                       </span>
                     </td>
                     <td>
-                      <Link
-                        to={`/pontes/${ponte.id}`}
-                        className="btn btn-sm btn-secondary"
-                      >
-                        Ver
-                      </Link>
+                      <div className="btn-group">
+                        <Link
+                          to={`/pontes/${ponte.id}`}
+                          className="btn btn-sm btn-secondary"
+                          title="Ver detalhes"
+                        >
+                          <Eye size={16} />
+                        </Link>
+                        <Link
+                          to={`/pontes/${ponte.id}/editar`}
+                          className="btn btn-sm btn-primary"
+                          title="Editar"
+                        >
+                          <Pencil size={16} />
+                        </Link>
+                        <button
+                          onClick={() => handleDeletePonteClick(ponte)}
+                          className="btn btn-sm btn-danger"
+                          title="Excluir"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -185,8 +224,9 @@ const RodoviaDetail = () => {
         isOpen={deleteModal.isOpen}
         onClose={handleCancelDelete}
         onConfirm={handleConfirmDelete}
-        itemName={rodovia?.nome || ''}
-        itemType="rodovia"
+        itemName={deleteModal.type === 'rodovia' ? rodovia?.nome || '' : deleteModal.item?.nome || ''}
+        itemType={deleteModal.type}
+        relatedItems={deleteModal.relatedItems}
       />
     </div>
   );

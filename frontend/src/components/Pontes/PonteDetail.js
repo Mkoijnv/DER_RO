@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Pencil, Trash2, ArrowLeft } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useToast } from '../../contexts/ToastContext';
 import ponteService from '../../services/ponteService';
 import ConfirmDeleteModal from '../Modal/ConfirmDeleteModal';
 import 'leaflet/dist/leaflet.css';
@@ -36,6 +37,7 @@ function FlyToLocation({ position, zoom }) {
 const PonteDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [ponte, setPonte] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -63,10 +65,13 @@ const PonteDetail = () => {
   const handleConfirmDelete = async () => {
     try {
       await ponteService.delete(id);
+      toast.success('Ponte excluída com sucesso!');
       setDeleteModal({ isOpen: false });
       navigate('/pontes');
     } catch (err) {
-      setError('Erro ao excluir ponte');
+      const errorMsg = 'Erro ao excluir ponte';
+      setError(errorMsg);
+      toast.error(errorMsg);
       setDeleteModal({ isOpen: false });
     }
   };

@@ -478,3 +478,33 @@
   }
 }
 
+/* Grupo de botões */
+.btn-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.btn-group .btn {
+  flex: 0 0 auto;
+}
+
+.btn-group .btn-sm {
+  min-width: 36px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .btn-group {
+    gap: 2px;
+  }
+  
+  .btn-group .btn-sm {
+    min-width: 32px;
+    padding: 6px;
+  }
+}
+
