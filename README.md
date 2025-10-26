@@ -75,7 +75,7 @@ Através de uma interface intuitiva e profissional, o sistema permite o cadastro
 
 ### Backend
 - **Laravel 11.x** - Framework PHP moderno
-- **SQLite** - Banco de dados leve e portátil
+- **MySQL** - Banco de dados leve e robusto
 - **Laravel Sanctum** - Autenticação API
 - **PHP 8.2+** - Linguagem de programação
 
