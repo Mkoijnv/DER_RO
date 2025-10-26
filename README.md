@@ -91,6 +91,7 @@ Através de uma interface intuitiva e profissional, o sistema permite o cadastro
 - **Nginx** - Servidor web
 - **Node.js 20.x** - Runtime JavaScript
 - **MinIO** - Object Storage S3-compatible
+- **Redis 7** - Cache, sessões e filas de alta performance
 
 ---
 
