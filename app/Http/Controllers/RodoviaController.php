@@ -39,7 +39,7 @@ class RodoviaController extends Controller
             'municipios.*' => 'exists:municipios,id',
         ]);
 
-        $rodovia = Rodovia::create($request->except('municipios'));
+        $rodovia = Rodovia::create($request->except(['municipios', '_method', '_token']));
 
         // Vincular municípios se fornecidos
         if ($request->has('municipios') && is_array($request->municipios)) {
@@ -94,7 +94,7 @@ class RodoviaController extends Controller
             'municipios.*' => 'exists:municipios,id',
         ]);
 
-        $rodovia->update($request->except('municipios'));
+        $rodovia->update($request->except(['municipios', '_method', '_token']));
 
         // Atualizar municípios se fornecidos
         if ($request->has('municipios') && is_array($request->municipios)) {

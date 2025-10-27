@@ -54,7 +54,7 @@ class PonteController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB
         ]);
 
-        $data = $request->except('foto');
+        $data = $request->except(['foto', '_method', '_token']);
 
         // Upload da foto no MinIO
         if ($request->hasFile('foto')) {
@@ -119,7 +119,7 @@ class PonteController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB
         ]);
 
-        $data = $request->except('foto');
+        $data = $request->except(['foto', '_method', '_token']);
 
         // Upload da nova foto no MinIO
         if ($request->hasFile('foto')) {
