@@ -34,6 +34,13 @@ RUN apk add --no-cache $PHPIZE_DEPS \
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copiar configurações de performance do PHP
+COPY docker/php-fpm/performance.ini /usr/local/etc/php/conf.d/performance.ini
+
+# Copiar script de inicialização
+COPY docker/php-fpm/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
 # Criar usuário para evitar problemas de permissão
 RUN addgroup -g 1000 laravel && adduser -G laravel -g laravel -s /bin/sh -D laravel
 
@@ -58,6 +65,8 @@ RUN chown -R laravel:laravel /var/www/html \
 # Expor porta
 EXPOSE 9000
 
+# Mudar para usuário laravel
 USER laravel
 
-CMD ["php-fpm"]
+# Usar script de inicialização otimizado
+CMD ["/usr/local/bin/start.sh"]

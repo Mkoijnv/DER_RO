@@ -6,6 +6,8 @@ services:
       - "8080:80"
     volumes:
       - ./:/var/www/html
+      - vendor_data:/var/www/html/vendor
+      - storage_data:/var/www/html/storage
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - php
@@ -19,7 +21,13 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
+      # Use volumes nomeados para vendor (MUITO mais rápido no Windows)
       - ./:/var/www/html
+      - vendor_data:/var/www/html/vendor
+      - storage_data:/var/www/html/storage
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
     depends_on:
       - mysql
       - redis
@@ -114,10 +122,29 @@ services:
       timeout: 20s
       retries: 3
 
+  # MinIO Init - Cria o bucket automaticamente
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Configurando MinIO...';
+      mc alias set myminio http://minio:9000 minioadmin minioadmin123;
+      mc mb myminio/pontes --ignore-existing;
+      mc anonymous set download myminio/pontes;
+      echo 'Bucket pontes criado e configurado!';
+      "
+    networks:
+      - laravel-network
+
 volumes:
   mysql_data:
   redis_data:
   minio_data:
+  vendor_data:    # Cache do Composer
+  storage_data:   # Storage do Laravel
 
 networks:
   laravel-network:
